@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import 'dotenv/config';
 import AppError from './errors/AppError';
+import userRouter from './routes/user';
 
 const MONGO_STRING = process.env.MONGO_STRING ?? '';
 const PORT = process.env.PORT ?? 3000;
@@ -22,6 +23,8 @@ async function connectDB() {
 }
 
 connectDB();
+
+app.use('/api/user', userRouter);
 
 app.use((req, res, next) => {
   res.status(404).json({
