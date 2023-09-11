@@ -30,15 +30,14 @@ app.get('/', (req, res) => {
 app.use(
   (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
     console.error(err);
-    let statusMessage = 'An error has occurred.';
-    let statusCode = 500;
 
-    if (err instanceof AppError) {
-      statusMessage = err.statusMessage;
-      statusCode = err.statusCode;
-    }
+    const statusMessage =
+      err instanceof AppError ? err.statusMessage : 'An error has occurred.';
+    const statusCode = err instanceof AppError ? err.statusCode : 500;
 
-    res.status(statusCode).json({ statusCode, statusMessage });
+    res
+      .status(statusCode)
+      .json({ statusCode, statusMessage, stack: err.stack });
   }
 );
 
