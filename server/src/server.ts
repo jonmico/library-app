@@ -4,8 +4,8 @@ import cors from 'cors';
 import 'dotenv/config';
 import AppError from './errors/AppError';
 
-const MONGO_STRING = process.env.MONGO_STRING || '';
-const PORT = process.env.PORT;
+const MONGO_STRING = process.env.MONGO_STRING ?? '';
+const PORT = process.env.PORT ?? 3000;
 
 const app = express();
 
@@ -31,7 +31,12 @@ app.use((req, res, next) => {
 });
 
 app.use(
-  (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
+  (
+    err: Error | AppError,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void => {
     console.error(err);
 
     const statusMessage =
