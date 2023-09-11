@@ -23,8 +23,11 @@ async function connectDB() {
 
 connectDB();
 
-app.get('/', (req, res) => {
-  throw new Error();
+app.use((req, res, next) => {
+  res.status(404).json({
+    statusCode: 404,
+    statusMessage: "We can't find what you are looking for.",
+  });
 });
 
 app.use(
@@ -35,9 +38,7 @@ app.use(
       err instanceof AppError ? err.statusMessage : 'An error has occurred.';
     const statusCode = err instanceof AppError ? err.statusCode : 500;
 
-    res
-      .status(statusCode)
-      .json({ statusCode, statusMessage, stack: err.stack });
+    res.status(statusCode).json({ statusCode, statusMessage });
   }
 );
 
