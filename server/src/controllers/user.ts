@@ -2,10 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import AppError from '../errors/AppError';
 
-export function getUser(req: Request, res: Response, next: NextFunction) {
-  res.json({ message: 'HELLO FROM GETUSER' });
-}
-
 export async function createUser(
   req: Request,
   res: Response,
