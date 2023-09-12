@@ -1,9 +1,11 @@
 import express from 'express';
 
-import { createBook } from '../controllers/book';
+import { createBook, checkoutBook } from '../controllers/book';
 
 const router = express.Router();
 
 router.post('/new', createBook);
+
+router.put('/checkout', checkoutBook);
 
 export default router;
