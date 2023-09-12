@@ -1,11 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import Book from '../models/book';
-import User from '../models/user';
-import AppError from '../errors/AppError';
-import IUser from '../types/user.interface';
-import IBook from '../types/book.interface';
-import mongoose from 'mongoose';
+import IReqBodyUserBook from '../types/reqbodyuserbook.interface';
 
 export async function createBook(
   req: Request,
@@ -20,11 +16,6 @@ export async function createBook(
   } catch (err) {
     next(err);
   }
-}
-
-interface IReqBodyUserBook {
-  user: IUser & mongoose.Document;
-  book: IBook & mongoose.Document;
 }
 
 export async function checkoutBook(
