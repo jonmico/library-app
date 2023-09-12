@@ -11,6 +11,10 @@ export default async function checkUser(
   try {
     const { user } = req.body;
 
+    if (!user || !user.email) {
+      throw new AppError(400, 'No user in request.');
+    }
+
     const existingUser = await User.findOne({ email: user.email }).exec();
 
     if (!existingUser) {
