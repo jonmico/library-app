@@ -3,6 +3,9 @@ import { NextFunction, Request, Response } from 'express';
 import Book from '../models/book';
 import User from '../models/user';
 import AppError from '../errors/AppError';
+import IUser from '../types/user.interface';
+import IBook from '../types/book.interface';
+import mongoose from 'mongoose';
 
 export async function createBook(
   req: Request,
@@ -19,37 +22,26 @@ export async function createBook(
   }
 }
 
+interface IReqBodyUserBook {
+  user: IUser & mongoose.Document;
+  book: IBook & mongoose.Document;
+}
+
 export async function checkoutBook(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const { user, bookId } = req.body;
+    const { user, book }: IReqBodyUserBook = req.body;
 
-    const existingUser = await User.findOne({ email: user.email }).exec();
+    book.isCheckedOut = true;
+    await book.save();
 
-    if (!existingUser) {
-      throw new AppError(404, 'User not found.');
-    }
+    user.checkedOutBooks.push(book._id);
+    await user.save();
 
-    const existingBook = await Book.findById(bookId);
-
-    if (!existingBook) {
-      throw new AppError(404, 'Book not found.');
-    }
-
-    if (existingBook.isCheckedOut) {
-      throw new AppError(403, 'Book is already checked out.');
-    }
-
-    existingBook.isCheckedOut = true;
-    await existingBook.save();
-
-    existingUser.checkedOutBooks.push(existingBook._id);
-    await existingUser.save();
-
-    res.json({ user: existingUser, book: existingBook });
+    res.json({ user, book });
   } catch (err) {
     next(err);
   }
