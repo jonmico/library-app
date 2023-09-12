@@ -59,6 +59,10 @@ export default async function checkBook(
       }
     }
 
+    if (!availableBooks.length) {
+      throw new AppError(400, 'None of the selected books are available.');
+    }
+
     req.body.books = {
       availableBooks,
       unavailableBooks,

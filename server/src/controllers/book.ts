@@ -18,21 +18,28 @@ export async function createBook(
   }
 }
 
-export async function checkoutBook(
+export async function checkoutBooks(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const { user, book }: IReqBodyUserBook = req.body;
+    const { user, books }: IReqBodyUserBook = req.body;
 
-    book.isCheckedOut = true;
-    await book.save();
+    await Book.updateMany(
+      { _id: { $in: books.availableBooks } },
+      {
+        isCheckedOut: true,
+      }
+    ).exec();
 
-    user.checkedOutBooks.push(book._id);
+    for (const book of books.availableBooks) {
+      user.checkedOutBooks.push(book._id);
+    }
+
     await user.save();
 
-    res.json({ user, book });
+    res.status(201).json({ user });
   } catch (err) {
     next(err);
   }

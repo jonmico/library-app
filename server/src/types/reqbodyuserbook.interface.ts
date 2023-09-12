@@ -4,5 +4,8 @@ import IUser from './user.interface';
 
 export default interface IReqBodyUserBook {
   user: IUser & mongoose.Document;
-  book: IBook & mongoose.Document;
+  books: {
+    availableBooks: IBook[] & mongoose.Document[];
+    unavailableBooks: IBook[] & mongoose.Document[];
+  };
 }
