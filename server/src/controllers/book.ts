@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import Book from '../models/book';
 import IReqBodyUserBook from '../types/reqbodyuserbook.interface';
+import AppError from '../errors/AppError';
 
 export async function createBook(
   req: Request,
@@ -26,12 +27,19 @@ export async function checkoutBooks(
   try {
     const { user, books }: IReqBodyUserBook = req.body;
 
-    await Book.updateMany(
+    const checkedOutBooks = await Book.updateMany(
       { _id: { $in: books.availableBooks } },
       {
         isCheckedOut: true,
       }
     ).exec();
+
+    if (checkedOutBooks.modifiedCount !== books.availableBooks.length) {
+      throw new AppError(
+        409,
+        'Concurrency issue: Some books were already checked out.'
+      );
+    }
 
     for (const book of books.availableBooks) {
       user.checkedOutBooks.push(book._id);
@@ -39,7 +47,7 @@ export async function checkoutBooks(
 
     await user.save();
 
-    res.status(201).json({ user });
+    res.status(201).json({ user, checkedOutBooks });
   } catch (err) {
     next(err);
   }

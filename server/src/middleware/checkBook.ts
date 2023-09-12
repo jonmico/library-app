@@ -3,32 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import Book from '../models/book';
 import AppError from '../errors/AppError';
 import IBook from '../types/book.interface';
-
-// export default async function checkBook(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) {
-//   try {
-//     const { bookId } = req.body;
-
-//     const existingBook = await Book.findById(bookId).exec();
-
-//     if (!existingBook) {
-//       throw new AppError(404, 'Book not found.');
-//     }
-
-//     if (existingBook.isCheckedOut) {
-//       throw new AppError(403, 'Book is already checked out.');
-//     }
-
-//     req.body.book = existingBook;
-
-//     next();
-//   } catch (err) {
-//     next(err);
-//   }
-// }
+import mongoose from 'mongoose';
 
 export default async function checkBook(
   req: Request,
@@ -45,7 +20,14 @@ export default async function checkBook(
     const booksToCheckout = await Book.find({ _id: { $in: bookIds } }).exec();
 
     if (bookIds.length !== booksToCheckout.length) {
-      throw new AppError(404, 'One or more books was not found.');
+      const foundBookIds = booksToCheckout.map((book) => book._id);
+      const missingBookIds = bookIds.filter(
+        (bookId: mongoose.Types.ObjectId) => !foundBookIds.includes(bookId)
+      );
+      throw new AppError(
+        404,
+        `One or more books were not found: ${missingBookIds.join(', ')}`
+      );
     }
 
     const availableBooks: IBook[] = [];
