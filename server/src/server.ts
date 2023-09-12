@@ -4,6 +4,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import AppError from './errors/AppError';
 import userRouter from './routes/user';
+import bookRouter from './routes/book';
 
 const MONGO_STRING = process.env.MONGO_STRING ?? '';
 const PORT = process.env.PORT ?? 3000;
@@ -25,6 +26,7 @@ async function connectDB() {
 connectDB();
 
 app.use('/api/user', userRouter);
+app.use('/api/book', bookRouter);
 
 app.use((req, res, next) => {
   res.status(404).json({
