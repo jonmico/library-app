@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import AppError from '../errors/AppError';
+import Book from '../models/book';
 
 export async function registerUser(
   req: Request,
@@ -50,7 +51,14 @@ export async function reserveBooks(
   next: NextFunction
 ) {
   try {
-    res.json({ message: 'Hello?' });
+    const { user, bookIds } = req.body;
+
+    const booksToReserve = await Book.find({
+      _id: { $in: bookIds },
+      isCheckedOut: { $eq: true },
+    });
+
+    res.json({ user, booksToReserve });
   } catch (err) {
     next(err);
   }
