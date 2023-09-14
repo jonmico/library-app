@@ -43,3 +43,15 @@ export async function validateUser(
     next(err);
   }
 }
+
+export async function reserveBooks(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    res.json({ message: 'Hello?' });
+  } catch (err) {
+    next(err);
+  }
+}
