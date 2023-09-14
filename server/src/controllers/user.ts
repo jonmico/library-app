@@ -60,13 +60,47 @@ export async function reserveBooks(
     const booksToReserve = await Book.find({
       _id: { $in: reserveList },
       isCheckedOut: { $eq: true },
-    });
+    }).exec();
 
     if (!booksToReserve.length) {
       throw new AppError(404, 'No books were found.');
     }
 
-    res.json({ user, booksToReserve, length: booksToReserve.length });
+    const filterReserves = booksToReserve.filter(
+      (book) => !user.checkedOutBooks.includes(book._id)
+    );
+
+    if (!filterReserves.length) {
+      throw new AppError(
+        400,
+        'All of the requested books were already checked out to the user.'
+      );
+    }
+
+    for (const book of filterReserves) {
+      user.reservedBooks.push(book._id);
+    }
+
+    user.save();
+
+    if (filterReserves.length !== booksToReserve.length) {
+      const missingBooks = booksToReserve.filter(
+        (book) => !filterReserves.includes(book)
+      );
+
+      res.json({
+        user,
+        reservedBooks: filterReserves,
+        unsuccessful: { reason: 'Already checked out.', missingBooks },
+      });
+    }
+
+    res.json({
+      user,
+      booksToReserve,
+      length: booksToReserve.length,
+      filterReserves,
+    });
   } catch (err) {
     next(err);
   }
