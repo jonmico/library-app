@@ -51,14 +51,22 @@ export async function reserveBooks(
   next: NextFunction
 ) {
   try {
-    const { user, bookIds } = req.body;
+    const { user, reserveList } = req.body;
+
+    if (!reserveList || !reserveList.length) {
+      throw new AppError(400, 'There were no book IDs to search for.');
+    }
 
     const booksToReserve = await Book.find({
-      _id: { $in: bookIds },
+      _id: { $in: reserveList },
       isCheckedOut: { $eq: true },
     });
 
-    res.json({ user, booksToReserve });
+    if (!booksToReserve.length) {
+      throw new AppError(404, 'No books were found.');
+    }
+
+    res.json({ user, booksToReserve, length: booksToReserve.length });
   } catch (err) {
     next(err);
   }
