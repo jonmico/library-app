@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import AppError from '../errors/AppError';
 import Book from '../models/book';
+import IBook from '../types/book.interface';
 
 export async function registerUser(
   req: Request,
@@ -45,6 +46,7 @@ export async function validateUser(
   }
 }
 
+// FIXME: Fix duplicate reserves.
 export async function reserveBooks(
   req: Request,
   res: Response,
@@ -61,6 +63,9 @@ export async function reserveBooks(
       _id: { $in: reserveList },
       isCheckedOut: { $eq: true },
     }).exec();
+
+    console.log(`reserveList: ${reserveList}, ${reserveList.length}`);
+    console.log(`booksToReserve: ${booksToReserve}, ${booksToReserve.length}`);
 
     if (!booksToReserve.length) {
       throw new AppError(404, 'No books were found.');
@@ -93,14 +98,14 @@ export async function reserveBooks(
         reservedBooks: filterReserves,
         unsuccessful: { reason: 'Already checked out.', missingBooks },
       });
+    } else {
+      res.json({
+        user,
+        booksToReserve,
+        length: booksToReserve.length,
+        filterReserves,
+      });
     }
-
-    res.json({
-      user,
-      booksToReserve,
-      length: booksToReserve.length,
-      filterReserves,
-    });
   } catch (err) {
     next(err);
   }
