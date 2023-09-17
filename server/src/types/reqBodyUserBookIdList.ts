@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import IUser from './user.interface';
 
-export default interface IReqBodyUserReserveList {
+export default interface IReqBodyUserBookIdList {
   user: IUser & mongoose.Document;
-  reserveList: mongoose.Schema.Types.ObjectId[];
+  bookIds: mongoose.Schema.Types.ObjectId[];
 }

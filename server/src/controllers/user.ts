@@ -2,9 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import AppError from '../errors/AppError';
 import Book from '../models/book';
-import IBook from '../types/book.interface';
-import IReqBodyUserReserveList from '../types/reqBodyUserReserveList';
-import { checkoutBooks } from './book';
+import IReqBodyUserReserveList from '../types/reqBodyUserBookIdList';
+import IReqBodyUserBookIdList from '../types/reqBodyUserBookIdList';
 
 export async function registerUser(
   req: Request,
@@ -48,21 +47,55 @@ export async function validateUser(
   }
 }
 
-// FIXME: Fix duplicate reserves.
+// FIXME: Fix duplicate checkouts.
+export async function checkoutBooks(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
+
+    const checkedOutBooks = await Book.updateMany(
+      { _id: { $in: bookIds.availableBooks } },
+      {
+        isCheckedOut: true,
+      }
+    ).exec();
+
+    if (checkedOutBooks.modifiedCount !== bookIds.availableBooks.length) {
+      throw new AppError(
+        409,
+        'Concurrency issue: Some books were already checked out.'
+      );
+    }
+
+    for (const book of bookIds.availableBooks) {
+      user.checkedOutBooks.push(book._id);
+    }
+
+    await user.save();
+
+    res.status(201).json({ user, checkedOutBooks });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function reserveBooks(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const { user, reserveList }: IReqBodyUserReserveList = req.body;
+    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
 
-    if (!reserveList || !reserveList.length) {
+    if (!bookIds || !bookIds.length) {
       throw new AppError(400, 'There were no book IDs to search for.');
     }
 
     const booksToReserve = await Book.find({
-      _id: { $in: reserveList },
+      _id: { $in: bookIds },
       isCheckedOut: { $eq: true },
     }).exec();
 
