@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/user';
 import AppError from '../errors/AppError';
 import Book from '../models/book';
-import IReqBodyUserReserveList from '../types/reqBodyUserBookIdList';
 import IReqBodyUserBookIdList from '../types/reqBodyUserBookIdList';
 
 export async function registerUser(
@@ -56,27 +55,30 @@ export async function checkoutBooks(
   try {
     const { user, bookIds }: IReqBodyUserBookIdList = req.body;
 
-    const checkedOutBooks = await Book.updateMany(
-      { _id: { $in: bookIds.availableBooks } },
-      {
-        isCheckedOut: true,
-      }
-    ).exec();
+    const booksToCheckout = await Book.find({
+      _id: { $in: bookIds },
+      isCheckedOut: { $eq: false },
+    });
 
-    if (checkedOutBooks.modifiedCount !== bookIds.availableBooks.length) {
+    if (!booksToCheckout.length) {
       throw new AppError(
-        409,
-        'Concurrency issue: Some books were already checked out.'
+        404,
+        'The books you requested are not available or not in our collection.'
       );
     }
 
-    for (const book of bookIds.availableBooks) {
+    await Book.updateMany(
+      { _id: { $in: booksToCheckout } },
+      { isCheckedOut: true }
+    );
+
+    for (const book of booksToCheckout) {
       user.checkedOutBooks.push(book._id);
     }
 
-    await user.save();
+    user.save();
 
-    res.status(201).json({ user, checkedOutBooks });
+    res.json({ user });
   } catch (err) {
     next(err);
   }
