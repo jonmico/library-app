@@ -16,3 +16,11 @@ export async function createBook(
     next(err);
   }
 }
+
+// TODO: Implement delete book controller. (?)
+
+// TODO: Implement edit book controller. (?)
+
+// TODO: Implement get book controller (like by ID).
+
+// TODO: Implement search controller. Title, author, keywords, etc.

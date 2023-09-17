@@ -142,3 +142,12 @@ export async function reserveBooks(
     next(err);
   }
 }
+
+// TODO: Implement return books controller.
+// Note: Interaction with pendingBooks and reserves will be important here.
+
+// TODO: Implement delete user controller.
+
+// TODO: Implement edit user controller.
+
+// TODO: Implement get user controller (like by ID or email, maybe both).
