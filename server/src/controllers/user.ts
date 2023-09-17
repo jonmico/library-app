@@ -3,6 +3,8 @@ import User from '../models/user';
 import AppError from '../errors/AppError';
 import Book from '../models/book';
 import IBook from '../types/book.interface';
+import IReqBodyUserReserveList from '../types/reqBodyUserReserveList';
+import { checkoutBooks } from './book';
 
 export async function registerUser(
   req: Request,
@@ -53,7 +55,7 @@ export async function reserveBooks(
   next: NextFunction
 ) {
   try {
-    const { user, reserveList } = req.body;
+    const { user, reserveList }: IReqBodyUserReserveList = req.body;
 
     if (!reserveList || !reserveList.length) {
       throw new AppError(400, 'There were no book IDs to search for.');
@@ -64,21 +66,32 @@ export async function reserveBooks(
       isCheckedOut: { $eq: true },
     }).exec();
 
-    console.log(`reserveList: ${reserveList}, ${reserveList.length}`);
-    console.log(`booksToReserve: ${booksToReserve}, ${booksToReserve.length}`);
-
     if (!booksToReserve.length) {
       throw new AppError(404, 'No books were found.');
     }
 
     const filterReserves = booksToReserve.filter(
-      (book) => !user.checkedOutBooks.includes(book._id)
+      (book) =>
+        !user.checkedOutBooks.includes(book._id) &&
+        !user.reservedBooks.includes(book._id)
     );
 
     if (!filterReserves.length) {
+      const checkedOut = booksToReserve.filter((book) =>
+        user.checkedOutBooks.includes(book._id)
+      );
+      const reserved = booksToReserve.filter((book) =>
+        user.reservedBooks.includes(book._id)
+      );
+
+      const checkedOutTitles = checkedOut.map((book) => book.title);
+      const reservedTitles = reserved.map((book) => book.title);
+
       throw new AppError(
         400,
-        'All of the requested books were already checked out to the user.'
+        `All of the requested books were either already reserved or checked out to the user. Books already checked out: ${checkedOutTitles.join(
+          ', '
+        )}; Books already reserved: ${reservedTitles.join(', ')}.`
       );
     }
 
@@ -88,24 +101,13 @@ export async function reserveBooks(
 
     user.save();
 
-    if (filterReserves.length !== booksToReserve.length) {
-      const missingBooks = booksToReserve.filter(
-        (book) => !filterReserves.includes(book)
-      );
+    const filterReservesTitles = filterReserves.map(
+      (book) => `${book.title} (${book._id})`
+    );
 
-      res.json({
-        user,
-        reservedBooks: filterReserves,
-        unsuccessful: { reason: 'Already checked out.', missingBooks },
-      });
-    } else {
-      res.json({
-        user,
-        booksToReserve,
-        length: booksToReserve.length,
-        filterReserves,
-      });
-    }
+    res.json({
+      reservedBooks: filterReservesTitles,
+    });
   } catch (err) {
     next(err);
   }
