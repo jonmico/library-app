@@ -90,10 +90,6 @@ export async function reserveBooks(
   try {
     const { user, bookIds }: IReqBodyUserBookIdList = req.body;
 
-    if (!bookIds || !bookIds.length) {
-      throw new AppError(400, 'There were no book IDs to search for.');
-    }
-
     const booksToReserve = await Book.find({
       _id: { $in: bookIds },
       isCheckedOut: { $eq: true },
