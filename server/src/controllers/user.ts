@@ -46,7 +46,6 @@ export async function validateUser(
   }
 }
 
-// FIXME: Fix duplicate checkouts.
 export async function checkoutBooks(
   req: Request,
   res: Response,
