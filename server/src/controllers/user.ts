@@ -52,7 +52,7 @@ export async function checkoutBooks(
   next: NextFunction
 ) {
   try {
-    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
+    const { user, bookIds } = req.body;
 
     const booksToCheckout = await Book.find({
       _id: { $in: bookIds },
@@ -89,7 +89,7 @@ export async function reserveBooks(
   next: NextFunction
 ) {
   try {
-    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
+    const { user, bookIds } = req.body;
 
     const booksToReserve = await Book.find({
       _id: { $in: bookIds },
@@ -150,7 +150,7 @@ export async function returnBooks(
   next: NextFunction
 ) {
   try {
-    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
+    const { user, bookIds } = req.body;
 
     if (!bookIds || !bookIds.length) {
       throw new AppError(400, 'No books were provided.');
