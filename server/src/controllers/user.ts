@@ -3,7 +3,6 @@ import User from '../models/user';
 import AppError from '../errors/AppError';
 import Book from '../models/book';
 import IReqBodyUserBookIdList from '../types/reqBodyUserBookIdList';
-import mongoose, { Types } from 'mongoose';
 
 export async function registerUser(
   req: Request,
