@@ -3,6 +3,7 @@ import User from '../models/user';
 import AppError from '../errors/AppError';
 import Book from '../models/book';
 import IReqBodyUserBookIdList from '../types/reqBodyUserBookIdList';
+import mongoose, { Types } from 'mongoose';
 
 export async function registerUser(
   req: Request,
@@ -69,7 +70,7 @@ export async function checkoutBooks(
     await Book.updateMany(
       { _id: { $in: booksToCheckout } },
       { isCheckedOut: true }
-    );
+    ).exec();
 
     for (const book of booksToCheckout) {
       user.checkedOutBooks.push(book._id);
@@ -144,6 +145,38 @@ export async function reserveBooks(
 }
 
 // TODO: Implement return books controller.
+export async function returnBooks(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
+
+    if (!bookIds || !bookIds.length) {
+      throw new AppError(400, 'No books were provided.');
+    }
+
+    // Remove potential duplicate bookIds in request.
+    const uniqueBookIds = [...new Set(bookIds)];
+
+    const books = await Book.find({
+      _id: { $in: uniqueBookIds },
+      isCheckedOut: { $eq: true },
+    }).exec();
+
+    if (!books.length) {
+      throw new AppError(404, 'No books were found.');
+    }
+
+    res.json({
+      bookIds,
+      books,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 // Note: Interaction with pendingBooks and reserves will be important here.
 
 // TODO: Implement delete user controller.
