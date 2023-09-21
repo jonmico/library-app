@@ -89,7 +89,7 @@ export async function reserveBooks(
   next: NextFunction
 ) {
   try {
-    const { user, bookIds } = req.body;
+    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
 
     const booksToReserve = await Book.find({
       _id: { $in: bookIds },

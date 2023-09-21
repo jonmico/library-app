@@ -5,5 +5,5 @@ export default interface IBook {
   title: string;
   isCheckedOut: boolean;
   checkedOutTo: string;
-  reservedTo: mongoose.Schema.Types.ObjectId[];
+  reservedTo: mongoose.Types.ObjectId[];
 }
