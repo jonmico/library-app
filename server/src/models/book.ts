@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import IBook from '../types/book.interface';
 
 const bookSchema = new mongoose.Schema<IBook>({

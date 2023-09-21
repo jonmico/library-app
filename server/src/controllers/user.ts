@@ -52,7 +52,7 @@ export async function checkoutBooks(
   next: NextFunction
 ) {
   try {
-    const { user, bookIds } = req.body;
+    const { user, bookIds }: IReqBodyUserBookIdList = req.body;
 
     const booksToCheckout = await Book.find({
       _id: { $in: bookIds },
@@ -68,7 +68,7 @@ export async function checkoutBooks(
 
     await Book.updateMany(
       { _id: { $in: booksToCheckout } },
-      { isCheckedOut: true }
+      { isCheckedOut: true, checkedOutTo: user.email }
     ).exec();
 
     for (const book of booksToCheckout) {
