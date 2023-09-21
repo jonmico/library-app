@@ -151,6 +151,16 @@ export async function reserveBooks(
   }
 }
 
+/* TODO: Add in a check for reserved books. 
+-- If a book is returned to the library and it is has a 'reserveList' length > 0, 
+it should go into 'holding' for the first user on the 'reserveTo' array. 
+-- At this point the book should have been updated to NOT be checked out. The book
+is technically IN.
+-- The user who the book is 'held' for should be pulled from the 'reservedTo' list.
+-- A user should be able to checkout a book they have 'held' (and only the user).
+-- When a 'held' book is checked out, the book should be removed from all lists associated
+with 'holding' and checked out to the user.
+*/
 export async function checkInBooks(
   req: Request,
   res: Response,
