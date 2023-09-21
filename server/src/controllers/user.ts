@@ -83,6 +83,7 @@ export async function checkoutBooks(
   }
 }
 
+// TODO: Look over this and see what we want to do with error handling.
 export async function reserveBooks(
   req: Request,
   res: Response,
@@ -107,16 +108,23 @@ export async function reserveBooks(
     );
 
     if (!filterReserves.length) {
+      // Filter for checked out books.
       const checkedOut = booksToReserve.filter((book) =>
         user.checkedOutBooks.includes(book._id)
       );
+
+      // Filter for reserved books.
       const reserved = booksToReserve.filter((book) =>
         user.reservedBooks.includes(book._id)
       );
 
+      // Map over both of the filtered arrays to get an array
+      // of only book titles.
       const checkedOutTitles = checkedOut.map((book) => book.title);
       const reservedTitles = reserved.map((book) => book.title);
 
+      // Throw an AppError that shows which books were checked out
+      // and which books were reserved.
       throw new AppError(
         400,
         `All of the requested books were either already reserved or checked out to the user. Books already checked out: ${checkedOutTitles.join(
@@ -143,7 +151,6 @@ export async function reserveBooks(
   }
 }
 
-// TODO: Implement return books controller.
 export async function checkInBooks(
   req: Request,
   res: Response,
@@ -181,7 +188,6 @@ export async function checkInBooks(
     next(err);
   }
 }
-// Note: Interaction with pendingBooks and reserves will be important here.
 
 // TODO: Implement delete user controller.
 
