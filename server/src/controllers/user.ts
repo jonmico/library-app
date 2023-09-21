@@ -144,7 +144,7 @@ export async function reserveBooks(
 }
 
 // TODO: Implement return books controller.
-export async function returnBooks(
+export async function checkInBooks(
   req: Request,
   res: Response,
   next: NextFunction
@@ -162,16 +162,21 @@ export async function returnBooks(
     const books = await Book.find({
       _id: { $in: uniqueBookIds },
       isCheckedOut: { $eq: true },
+      checkedOutTo: { $eq: user.email },
     }).exec();
 
     if (!books.length) {
       throw new AppError(404, 'No books were found.');
     }
 
-    res.json({
-      bookIds,
-      books,
-    });
+    await Book.updateMany(
+      {
+        _id: { $in: uniqueBookIds },
+      },
+      { isCheckedOut: false, checkedOutTo: '' }
+    ).exec();
+
+    res.json({ user });
   } catch (err) {
     next(err);
   }

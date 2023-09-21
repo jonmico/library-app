@@ -4,7 +4,7 @@ import {
   checkoutBooks,
   registerUser,
   reserveBooks,
-  returnBooks,
+  checkInBooks,
   validateUser,
 } from '../controllers/user';
 import checkUser from '../middleware/checkUser';
@@ -20,6 +20,6 @@ router.put('/checkout', checkUser, checkBooks, checkoutBooks);
 
 router.put('/reserve', checkUser, checkBooks, reserveBooks);
 
-router.put('/return', checkUser, returnBooks);
+router.put('/checkin', checkUser, checkInBooks);
 
 export default router;
