@@ -6,4 +6,5 @@ export default interface IBook {
   isCheckedOut: boolean;
   checkedOutTo: string;
   reservedTo: mongoose.Types.ObjectId[];
+  isHolding: boolean;
 }
