@@ -137,7 +137,12 @@ export async function reserveBooks(
       user.reservedBooks.push(book._id);
     }
 
-    user.save();
+    await user.save();
+
+    await Book.updateMany(
+      { _id: { $in: filterReserves } },
+      { $addToSet: { reservedTo: user._id } }
+    );
 
     const filterReservesTitles = filterReserves.map(
       (book) => `${book.title} (${book._id})`
