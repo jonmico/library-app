@@ -194,7 +194,7 @@ export async function checkInBooks(
     const reservedBooks = books.filter((book) => book.reservedTo.length);
 
     if (reservedBooks.length) {
-      const bulkOperations = reservedBooks.map((book) => ({
+      const bulkBookOperations = reservedBooks.map((book) => ({
         updateOne: {
           filter: { _id: book._id },
           update: {
@@ -205,7 +205,19 @@ export async function checkInBooks(
         },
       }));
 
-      await Book.bulkWrite(bulkOperations);
+      await Book.bulkWrite(bulkBookOperations);
+
+      for (const book of reservedBooks) {
+        const userToUpdate = await User.findOneAndUpdate(
+          { _id: book.heldTo },
+          {
+            $pull: {
+              reservedBooks: book._id,
+            },
+            $push: { holdingBooks: book._id },
+          }
+        );
+      }
     }
 
     await Book.updateMany(
