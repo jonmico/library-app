@@ -6,8 +6,9 @@ const bookSchema = new mongoose.Schema<IBook>({
   author: { type: String, required: true },
   isCheckedOut: { type: Boolean, default: false },
   checkedOutTo: { type: String, default: '' },
-  reservedTo: [{ type: Types.ObjectId, ref: 'User' }],
+  reservedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   isHolding: { type: Boolean, default: false },
+  heldTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 });
 
 const Book = mongoose.model('Book', bookSchema);

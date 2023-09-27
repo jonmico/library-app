@@ -191,14 +191,24 @@ export async function checkInBooks(
       throw new AppError(404, 'No books were found.');
     }
 
-    await Book.updateMany(
-      {
-        _id: { $in: uniqueBookIds },
-      },
-      { isCheckedOut: false, checkedOutTo: '' }
-    ).exec();
+    const reservedBooks = books.filter((book) => book.reservedTo.length);
 
-    res.json({ user });
+    if (reservedBooks.length) {
+      for (const book of reservedBooks) {
+        book.isHolding = true;
+        book.heldTo = book.reservedTo[0];
+        book.reservedTo = book.reservedTo.filter((id) => book.heldTo !== id);
+      }
+    }
+
+    // await Book.updateMany(
+    //   {
+    //     _id: { $in: uniqueBookIds },
+    //   },
+    //   { isCheckedOut: false, checkedOutTo: '' }
+    // ).exec();
+
+    res.json({ user, reservedBooks });
   } catch (err) {
     next(err);
   }
