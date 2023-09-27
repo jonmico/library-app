@@ -194,19 +194,26 @@ export async function checkInBooks(
     const reservedBooks = books.filter((book) => book.reservedTo.length);
 
     if (reservedBooks.length) {
-      for (const book of reservedBooks) {
-        book.isHolding = true;
-        book.heldTo = book.reservedTo[0];
-        book.reservedTo = book.reservedTo.filter((id) => book.heldTo !== id);
-      }
+      const bulkOperations = reservedBooks.map((book) => ({
+        updateOne: {
+          filter: { _id: book._id },
+          update: {
+            isHolding: true,
+            heldTo: book.reservedTo[0],
+            reservedTo: book.reservedTo.slice(1),
+          },
+        },
+      }));
+
+      await Book.bulkWrite(bulkOperations);
     }
 
-    // await Book.updateMany(
-    //   {
-    //     _id: { $in: uniqueBookIds },
-    //   },
-    //   { isCheckedOut: false, checkedOutTo: '' }
-    // ).exec();
+    await Book.updateMany(
+      {
+        _id: { $in: uniqueBookIds },
+      },
+      { isCheckedOut: false, checkedOutTo: '' }
+    ).exec();
 
     res.json({ user, reservedBooks });
   } catch (err) {
